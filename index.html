@@ -3,33 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTA 5 RP Farm Tracker</title>
-    <link rel="stylesheet" href="style.css">
+    <title>GTA 5 RP - Farm Tracker</title>
+    <style>
+        /* Основные стили интерфейса */
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .main-card {
+            background: linear-gradient(145deg, #1a1a1a, #111111);
+            width: 350px;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border-top: 4px solid #ff4444; /* Фирменный акцент */
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .nickname {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: #222;
+            padding: 15px 10px;
+            border-radius: 12px;
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #ff4444;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background-color: #ff6666;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background-color: #2a2a2a;
+            color: #777;
+        }
+
+        .btn-reset:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        /* Анимация при обновлении цифр */
+        .pulse {
+            animation: pulse-animation 0.3s ease-out;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: #ff4444; }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>MAJESTIC <span class="accent">FARM</span></h1>
-            <p>Статистика персонажа: <strong id="nickname">m0nixt12</strong></p>
-        </header>
 
-        <div class="stats-grid">
-            <div class="card">
-                <h3>Собрано ресурсов</h3>
-                <p id="items-count" class="value">0</p>
+    <div class="main-card">
+        <h1>MAJESTIC FARM</h1>
+        <div class="nickname">ID: <span id="user-name">m0nixt12</span></div>
+
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-label">Предметы</div>
+                <div id="items" class="stat-value">0</div>
             </div>
-            <div class="card">
-                <h3>Заработано ($)</h3>
-                <p id="money-count" class="value">0</p>
+            <div class="stat-box">
+                <div class="stat-label">Прибыль ($)</div>
+                <div id="money" class="stat-value">0</div>
             </div>
         </div>
 
         <div class="controls">
-            <button onclick="updateStats(1, 500)" class="btn-farm">Фармить</button>
-            <button onclick="resetStats()" class="btn-reset">Сбросить смену</button>
+            <button class="btn-add" onclick="addFarm()">Добавить единицу фарма</button>
+            <button class="btn-reset" onclick="clearStats()">Сбросить прогресс</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Задаем настройки фарма (сколько давать за один клик)
+        const REWARD_PER_CLICK = 750; 
+
+        // Загрузка данных из локальной памяти браузера при открытии
+        let count = parseInt(localStorage.getItem('gta_farm_count')) || 0;
+        let cash = parseInt(localStorage.getItem('gta_farm_cash')) || 0;
+
+        // Функция обновления текста на экране
+        function updateDisplay() {
+            const itemsEl = document.getElementById('items');
+            const moneyEl = document.getElementById('money');
+
+            itemsEl.innerText = count;
+            moneyEl.innerText = cash.toLocaleString();
+
+            // Добавляем эффект пульсации при изменении
+            itemsEl.classList.add('pulse');
+            moneyEl.classList.add('pulse');
+            setTimeout(() => {
+                itemsEl.classList.remove('pulse');
+                moneyEl.classList.remove('pulse');
+            }, 300);
+        }
+
+        // Функция фарма
+        function addFarm() {
+            count += 1;
+            cash += REWARD_PER_CLICK;
+
+            // Сохраняем в localStorage (не пропадет при выходе)
+            localStorage.setItem('gta_farm_count', count);
+            localStorage.setItem('gta_farm_cash', cash);
+
+            updateDisplay();
+        }
+
+        // Функция сброса
+        function clearStats() {
+            if (confirm("Вы уверены, что хотите обнулить статистику?")) {
+                count = 0;
+                cash = 0;
+                localStorage.removeItem('gta_farm_count');
+                localStorage.removeItem('gta_farm_cash');
+                updateDisplay();
+            }
+        }
+
+        // Вызываем обновление при старте, чтобы показать старые данные
+        updateDisplay();
+    </script>
+
 </body>
 </html>
