@@ -46,7 +46,7 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Локальные переменные для мгновенного обновления
+        // Переменные для хранения текущих значений на экране
         let currentInc = 0;
         let currentExp = 0;
 
@@ -54,22 +54,17 @@
             let type = document.getElementById('type').value;
             let val = parseInt(document.getElementById('amount').value);
 
-            if (!val || val <= 0) return;
+            if (!val || val <= 0) {
+                alert("Введите сумму!");
+                return;
+            }
 
-            // 1. Мгновенно обновляем цифры в интерфейсе
-            if (type === 'inc') currentInc += val;
-            else currentExp += val;
+            // 1. МГНОВЕННОЕ ОБНОВЛЕНИЕ ЦИФР НА ЭКРАНЕ (без выхода)
+            if (type === 'inc') {
+                currentInc += val;
+            } else {
+                currentExp += val;
+            }
 
-            document.getElementById('disp_inc').innerText = currentInc + "$";
-            document.getElementById('disp_exp').innerText = currentExp + "$";
-            document.getElementById('disp_total').innerText = (currentInc - currentExp) + "$";
-
-            // 2. Отправляем данные боту (к сожалению, tg.sendData ЗАКРОЕТ приложение)
-            // Чтобы приложение НЕ ЗАКРЫВАЛОСЬ, данные нужно отправлять через API.
-            // Но ты можешь использовать кнопку "MainButton" самого Телеграма для красоты.
-            
-            tg.sendData(JSON.stringify({type, amount: val})); 
-        }
-    </script>
-</body>
-</html>
+            // Обновляем текст в табличках по их ID
+            document.getElementById('disp_inc').innerText
